@@ -19,8 +19,8 @@
 class Node
   attr_accessor :parent, :children, :cars
 
-  Map_x = 6  #x size of the map
-  Map_y = 6  #y size of the map
+  Map_x = 6 - 1  #x size of the map
+  Map_y = 6 - 1 #y size of the map
 
   def initialize(options = {})
     @parent = options[:parent]
@@ -29,7 +29,7 @@ class Node
   end
 
   def get_children
-    self.cars.each do |car|
+    cars.each do |car|
       x = car.x
       y = car.y
 
@@ -42,29 +42,43 @@ class Node
   end
 
   def find_direction(dir, var_cor, const_cor, map_var, car)
-      while var_cor < map_var
-        var_cor += 1
-        find_child(dir,var_cor,const_cor, car)
+    new_x = var_cor + car.length - 1
+      while new_x < map_var
+        new_x += 1
+        if find_child(dir,new_x,const_cor, car)
+          new_node(dir,new_x - car.length + 1, car)
+        else
+          break
+        end
       end
-      while var_cor > 0
-        var_cor -= 1
-        find_child(dir,var_cor,const_cor, car)
-      end
+    new_x = var_cor
+      while new_x > 0
+        new_x -= 1
+        if find_child(dir,new_x,const_cor, car)
+          new_node(dir,new_x, car)
+        else
+        break
+        end      end
   end
 
   def find_child(dir, var_cor,const_cor, car)
     self.cars.each do |c|
       puts var_cor.to_s + ' ' + const_cor.to_s
-      if(c != car and (not c.is_there?(var_cor, const_cor)))
-        puts (c != car and (not c.is_there?(var_cor,const_cor)))
-        n = Node.new(parent: self.parent, cars: self.cars.clone)
-        new_car = (n.cars.select {|ca| ca.x == car.x and ca.y==car.y})[0]
-        puts new_car.color.to_s + ' ' + new_car.x.to_s + ' ' + new_car.y.to_s
-        new_car.setx(var_cor) if dir == 'x'
-        new_car.sety(var_cor) if dir == 'y'
-        self.children.push(n)
+      if(c != car and c.is_there?(var_cor, const_cor))
+        return false
       end
     end
+    true
+  end
+
+  def new_node(dir, cor, car)
+    n = Node.new(parent: self, cars: cars.clone)
+    new_car = (n.cars.select {|ca| ca.color == car.color})[0]
+    puts new_car.color.to_s + ' ' + new_car.x.to_s + ' ' + new_car.y.to_s
+    new_car.setx(cor) if dir == 'x'
+    new_car.sety(cor) if dir == 'y'
+    puts new_car.color.to_s + ' ' + new_car.x.to_s + ' ' + new_car.y.to_s
+    children.push(n)
   end
 
 end
