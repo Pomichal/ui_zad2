@@ -17,9 +17,8 @@ class Search
       node = open_set.shift
 
       if goal?(node)
-        print_result node
         puts "Prehladanych uzlov: #{nodes_count}"
-        return
+        return print_result node
       end
 
       node.set_children
@@ -33,6 +32,7 @@ class Search
     end
     puts "Prehladanych uzlov: #{nodes_count}"
     puts "riesenie neexistuje"
+    nil
   end
 
   def goal?(node)
@@ -53,6 +53,7 @@ class Search
       puts z
     end
     puts "Pocet krokov: #{steps}"
+    steps
   end
 
 end
@@ -201,4 +202,5 @@ node2 = s.searching node, 1
 puts "......................."
 
 s.searching node, 0
+
 
