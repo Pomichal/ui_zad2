@@ -14,15 +14,14 @@ class Search
 
     while not open_set.empty?
       node = open_set.shift
-      node.cars.each do |car|
-        puts get_color(car.color).to_s + ' ' + car.x.to_s + ' ' + car.y.to_s
-      end
 
       return node if goal?(node)
 
       node.set_children
       node.children.each do |child|
+        if(closed_set.add? child.number)
         open_set.push(child)
+        end
       end
     end
   end
@@ -33,26 +32,6 @@ class Search
     false
   end
 
-
-  def get_color(int)
-    if int == 1
-      'cervene'
-    elsif int == 2
-      'oranzove'
-    elsif int == 3
-      'zlte'
-    elsif int == 4
-      'fialove'
-    elsif int == 5
-      'zelene'
-    elsif int == 6
-      'svetlomodre'
-    elsif int == 7
-      'sive'
-    elsif int == 8
-      'tmavomodre'
-    end
-  end
 end
 
 class Car
@@ -87,12 +66,22 @@ class Car
 end
 
 class Node
-  attr_accessor :parent, :children, :cars
+  attr_accessor :parent, :children, :cars, :number, :zmena
 
   def initialize(options = {})
     @parent = options[:parent]
     @children = []
     @cars = options[:cars]
+    @number = 0
+    @zmena = ""
+  end
+
+  def set_number
+    tmp = 0
+    cars.each do |car|
+      tmp += (10 ** car.color) * (car.x + car.y)
+    end
+    @number = tmp
   end
 
   def set_children
@@ -102,23 +91,23 @@ class Node
       color = car.color
       if car.direction == 'x'
         while is_free?(car, x + car.length, y)
-          new_node(color, x + 1, y)
+          new_node(color, x + 1, y, "Vpravo(#{get_color color}, #{x - car.x + 1})")
           x += 1
         end
         x = car.x
         while is_free?(car, x - 1, y)
-          new_node(color, x - 1, y)
+          new_node(color, x - 1, y,"Vlavo(#{get_color color}, #{car.x - x + 1})")
           x -= 1
         end
         x = car.x
       else
         while is_free?(car, x, y + car.length)
-          new_node(color, x, y + 1)
+          new_node(color, x, y + 1,"Dole(#{get_color color}, #{y - car.y + 1})")
           y += 1
         end
         y = car.y
         while is_free?(car, x, y - 1)
-          new_node(color, x, y - 1)
+          new_node(color, x, y - 1,"Hore(#{get_color color}, #{car.y - y + 1})")
           y -= 1
         end
       end
@@ -137,15 +126,36 @@ class Node
     true
   end
 
-  def new_node(color, x, y)
+  def new_node(color, x, y, krok)
     tmp_cars = []
     cars.each {|c| tmp_cars.push(c.dup)}
     n = Node.new(parent: self, cars: tmp_cars)
     new_car = (n.cars.select {|ca| ca.color == color})[0]
     new_car.setx x
     new_car.sety y
-    puts new_car.color.to_s + ' ' + new_car.x.to_s + ' ' + new_car.y.to_s
+    n.set_number
+    n.zmena = krok
     children.push(n)
+  end
+
+  def get_color(int)
+    if int == 1
+      'cervene'
+    elsif int == 2
+      'oranzove'
+    elsif int == 3
+      'zlte'
+    elsif int == 4
+      'fialove'
+    elsif int == 5
+      'zelene'
+    elsif int == 6
+      'svetlomodre'
+    elsif int == 7
+      'sive'
+    elsif int == 8
+      'tmavomodre'
+    end
   end
 
 end
@@ -159,11 +169,20 @@ car6 = Car.new(color:6, length:3, x:2,y:5, direction:'x')
 car7 = Car.new(color:7, length:2, x:4,y:4, direction:'x')
 car8 = Car.new(color:8, length:3, x:5,y:0, direction:'y')
 
-node = Node.new(parent:nil,cars:[car1,car2,car3,car5,car6,car7,car8])
+node = Node.new(parent:nil,cars:[car1,car2,car3,car4,car5,car6,car7,car8])
 
 s = Search.new
 
 node2 = s.bfs node
 
-puts 'ooooooooooooooooooooooooooooooooooooooooooo'
-puts node2.class
+
+while node2.zmena != ""
+  result = []
+  result.unshift node2.zmena
+  node2 = node2.parent
+end
+
+result.each do |z|
+  puts z
+end
+
