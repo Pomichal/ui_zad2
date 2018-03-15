@@ -5,8 +5,9 @@ Map_y = 6 - 1 #y size of the map
 require 'set'
 
 class Search
-  ##breadt-first search
-  def bfs (source)
+  ##breadt-first search 0, deep first search 1
+  def searching(source, type)
+    nodes_count = 0
     open_set = []
     closed_set = Set.new
 
@@ -17,43 +18,22 @@ class Search
 
       if goal?(node)
         print_result node
+        puts "Prehladanych uzlov: #{nodes_count}"
         return
       end
 
       node.set_children
       node.children.each do |child|
         if(closed_set.add? child.number)
-        open_set.push(child)
+        open_set.push(child) if type == 0
+        open_set.unshift(child) if type == 1
+          nodes_count += 1
         end
       end
     end
-    print "riesenie neexistuje"
+    puts "Prehladanych uzlov: #{nodes_count}"
+    puts "riesenie neexistuje"
   end
-
-  def dfs (source)
-    open_set = []
-    closed_set = Set.new
-
-    open_set.push(source)
-
-    while not open_set.empty?
-      node = open_set.shift
-
-      if goal?(node)
-        print_result node
-        return
-      end
-
-      node.set_children
-      node.children.each do |child|
-        if(closed_set.add? child.number)
-          open_set.unshift(child)
-        end
-      end
-    end
-    print "riesenie neexistuje"
-  end
-
 
   def goal?(node)
     new_car = (node.cars.select {|car| car.color == 1})[0]
@@ -62,14 +42,17 @@ class Search
   end
 
   def print_result(node)
+    steps = 0
     result = []
     while node.change != ""
       result.unshift node.change
       node = node.parent
+      steps += 1
     end
     result.each do |z|
       puts z
     end
+    puts "Pocet krokov: #{steps}"
   end
 
 end
@@ -213,9 +196,9 @@ node = Node.new(parent:nil,cars:[car1,car2,car3,car4,car5,car6,car7,car8])
 
 s = Search.new
 
-node2 = s.bfs node
+node2 = s.searching node, 1
 
 puts "......................."
 
-s.dfs node
+s.searching node, 0
 
