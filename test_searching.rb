@@ -3,7 +3,7 @@ require 'test/unit'
 
 class Test_searching < Test::Unit::TestCase
 
-  def test_first_example
+  def test_first_example #bfs, expected steps:8
     # 2 2 - - - 8
     # 3 - - 5 - 8
     # 3 1 1 5 - 8
@@ -24,7 +24,7 @@ class Test_searching < Test::Unit::TestCase
     assert_equal(8,Search.new.searching(node,0))
   end
 
-  def test_unsolvable_example
+  def test_unsolvable_example #dfs, bfs expected:nil
     # 2 2 - - - 8
     # 3 - - - - 8
     # 3 1 1 - - 8
@@ -43,9 +43,10 @@ class Test_searching < Test::Unit::TestCase
     node = Node.new(parent:nil,cars:[car1,car2,car3,car4,car5,car6,car7,car8])
 
     assert_equal(nil,Search.new.searching(node,0))
+    assert_equal(nil,Search.new.searching(node,1))
   end
 
-  def test_harder_example
+  def test_harder_example #bfs, expected steps: 49
     # 13 13 13 4  5  6
     # 2  12 12 4  5  6
     # 2  -  1  1  5  6

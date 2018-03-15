@@ -12,34 +12,37 @@ class Search
 
     open_set.push(source)
 
-    while not open_set.empty?
-      node = open_set.shift
+    while not open_set.empty? #main loop
+      node = open_set.shift #get the first node from queue
 
-      if goal?(node)
+      if goal?(node)        #if reached the goal, finish and print the result
         puts "Prehladanych uzlov: #{nodes_count}"
         return print_result node
       end
 
-      node.set_children
+      node.set_children  #searching after next moves
       node.children.each do |child|
-        if(closed_set.add? child.number)
-        open_set.push(child) if type == 0
-        open_set.unshift(child) if type == 1
+        if(closed_set.add? child.number)      #adding new nodes, (duplicates don't)
+        open_set.push(child) if type == 0     #bfs: adding to end of the queue
+        open_set.unshift(child) if type == 1  #dfs: adding to beginning of the queue
           nodes_count += 1
         end
       end
     end
+    #if no result found
     puts "Prehladanych uzlov: #{nodes_count}"
     puts "riesenie neexistuje"
     nil
   end
 
+  #returns true, if goal is reached (the red car is on coordinates 4,3 and 5,3)
   def goal?(node)
     new_car = (node.cars.select {|car| car.color == 1})[0]
     return true if(new_car.x == Map_x - new_car.length + 1)
     false
   end
 
+  #prints the steps to result
   def print_result(node)
     steps = 0
     result = []
@@ -76,7 +79,7 @@ class Car
     self.y = y
   end
 
-  def is_there?(x,y)     #return true, if car is on place x y
+  def is_there?(x,y)     #return true, if car is on position x y
     self.length.times do |len|
       my_x = self.x
       my_x += len if direction == 'x'
@@ -99,7 +102,7 @@ class Node
     @change = ""
   end
 
-  def set_number
+  def set_number #number representing the places of cars on table
     tmp = 0
     cars.each do |car|
       tmp += (10 ** car.color) * (car.x + car.y)
@@ -107,7 +110,7 @@ class Node
     @number = tmp
   end
 
-  def set_children
+  def set_children #find all possibly next moves
     @cars.each do |car|
       x = car.x
       y = car.y
@@ -137,7 +140,7 @@ class Node
     end
   end
 
-  def is_free?(car,x,y)
+  def is_free?(car,x,y) #returns true, if place x y is free
     if x<0 or x>Map_x or y<0 or y>Map_y
       return false
     end
@@ -149,7 +152,7 @@ class Node
     true
   end
 
-  def new_node(color, x, y, krok)
+  def new_node(color, x, y, krok) #creates a children node
     tmp_cars = []
     cars.each {|c| tmp_cars.push(c.dup)}
     n = Node.new(parent: self, cars: tmp_cars)
@@ -161,7 +164,7 @@ class Node
     children.push(n)
   end
 
-  def get_color(int)
+  def get_color(int) #changes numbers to colors
     if int == 1
       'cervene'
     elsif int == 2
@@ -180,5 +183,4 @@ class Node
       'tmavomodre'
     end
   end
-
 end
