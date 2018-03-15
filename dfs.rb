@@ -15,7 +15,10 @@ class Search
     while not open_set.empty?
       node = open_set.shift
 
-      return node if goal?(node)
+      if goal?(node)
+        print_result node
+        return
+      end
 
       node.set_children
       node.children.each do |child|
@@ -24,12 +27,49 @@ class Search
         end
       end
     end
+    print "riesenie neexistuje"
   end
+
+  def dfs (source)
+    open_set = []
+    closed_set = Set.new
+
+    open_set.push(source)
+
+    while not open_set.empty?
+      node = open_set.shift
+
+      if goal?(node)
+        print_result node
+        return
+      end
+
+      node.set_children
+      node.children.each do |child|
+        if(closed_set.add? child.number)
+          open_set.unshift(child)
+        end
+      end
+    end
+    print "riesenie neexistuje"
+  end
+
 
   def goal?(node)
     new_car = (node.cars.select {|car| car.color == 1})[0]
     return true if(new_car.x == Map_x - new_car.length + 1)
     false
+  end
+
+  def print_result(node)
+    result = []
+    while node.change != ""
+      result.unshift node.change
+      node = node.parent
+    end
+    result.each do |z|
+      puts z
+    end
   end
 
 end
@@ -66,14 +106,14 @@ class Car
 end
 
 class Node
-  attr_accessor :parent, :children, :cars, :number, :zmena
+  attr_accessor :parent, :children, :cars, :number, :change
 
   def initialize(options = {})
     @parent = options[:parent]
     @children = []
     @cars = options[:cars]
     @number = 0
-    @zmena = ""
+    @change = ""
   end
 
   def set_number
@@ -134,7 +174,7 @@ class Node
     new_car.setx x
     new_car.sety y
     n.set_number
-    n.zmena = krok
+    n.change = krok
     children.push(n)
   end
 
@@ -175,14 +215,7 @@ s = Search.new
 
 node2 = s.bfs node
 
+puts "......................."
 
-while node2.zmena != ""
-  result = []
-  result.unshift node2.zmena
-  node2 = node2.parent
-end
-
-result.each do |z|
-  puts z
-end
+s.dfs node
 
