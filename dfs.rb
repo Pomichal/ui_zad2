@@ -1,18 +1,59 @@
-#
-# breadt-first search
-# def bfs (source, goal)
-#   open_set = []
-#   closed_set = Set.new
-#
-#   while not open_set.is_empty?
-#     node = open_set.shift
-#
-#     return node if node == goal
-#
-#     node.get_children.each do |child|
-#       open_set.push(child)
-#     end
-#   end
+Map_x = 6 - 1  #x size of the map
+Map_y = 6 - 1 #y size of the map
+
+
+require 'set'
+
+class Search
+  ##breadt-first search
+  def bfs (source)
+    open_set = []
+    closed_set = Set.new
+
+    open_set.push(source)
+
+    while not open_set.empty?
+      node = open_set.shift
+      node.cars.each do |car|
+        puts get_color(car.color).to_s + ' ' + car.x.to_s + ' ' + car.y.to_s
+      end
+
+      return node if goal?(node)
+
+      node.set_children
+      node.children.each do |child|
+        open_set.push(child)
+      end
+    end
+  end
+
+  def goal?(node)
+    new_car = (node.cars.select {|car| car.color == 1})[0]
+    return true if(new_car.x == Map_x - new_car.length + 1)
+    false
+  end
+
+
+  def get_color(int)
+    if int == 1
+      'cervene'
+    elsif int == 2
+      'oranzove'
+    elsif int == 3
+      'zlte'
+    elsif int == 4
+      'fialove'
+    elsif int == 5
+      'zelene'
+    elsif int == 6
+      'svetlomodre'
+    elsif int == 7
+      'sive'
+    elsif int == 8
+      'tmavomodre'
+    end
+  end
+end
 
 class Car
   attr_accessor :color, :length, :x, :y, :direction
@@ -47,9 +88,6 @@ end
 
 class Node
   attr_accessor :parent, :children, :cars
-
-  Map_x = 6 - 1  #x size of the map
-  Map_y = 6 - 1 #y size of the map
 
   def initialize(options = {})
     @parent = options[:parent]
@@ -112,22 +150,20 @@ class Node
 
 end
 
-car1 = Car.new(color:'cervene', length:2, x:1,y:2, direction:'x')
-car2 = Car.new(color:'oranzove', length:2, x:0,y:0, direction:'x')
-car3 = Car.new(color:'zlte', length:3, x:0,y:1, direction:'y')
-car4 = Car.new(color:'fialove', length:2, x:0,y:4, direction:'y')
-car5 = Car.new(color:'zelene', length:3, x:3,y:1, direction:'y')
-car6 = Car.new(color:'svetlomodre', length:3, x:2,y:5, direction:'x')
-car7 = Car.new(color:'sive', length:2, x:4,y:4, direction:'x')
-car8 = Car.new(color:'tmavomodre', length:3, x:5,y:0, direction:'y')
+car1 = Car.new(color:1, length:2, x:1,y:2, direction:'x')
+car2 = Car.new(color:2, length:2, x:0,y:0, direction:'x')
+car3 = Car.new(color:3, length:3, x:0,y:1, direction:'y')
+car4 = Car.new(color:4, length:2, x:0,y:4, direction:'y')
+car5 = Car.new(color:5, length:3, x:3,y:1, direction:'y')
+car6 = Car.new(color:6, length:3, x:2,y:5, direction:'x')
+car7 = Car.new(color:7, length:2, x:4,y:4, direction:'x')
+car8 = Car.new(color:8, length:3, x:5,y:0, direction:'y')
 
-node = Node.new(parent:nil,cars:[car1,car2, car3, car4, car5, car6, car7, car8])
+node = Node.new(parent:nil,cars:[car1,car2,car3,car5,car6,car7,car8])
 
-node.set_children
+s = Search.new
 
-puts "###############"
+node2 = s.bfs node
 
-node.children.each do |c|
-  c.cars.each {|car| puts car.color.to_s + ' ' + car.x.to_s + ' ' + car.y.to_s}
-  puts "###############"
-end
+puts 'ooooooooooooooooooooooooooooooooooooooooooo'
+puts node2.class
