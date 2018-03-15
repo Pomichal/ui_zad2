@@ -1,4 +1,4 @@
-
+#
 # breadt-first search
 # def bfs (source, goal)
 #   open_set = []
@@ -13,76 +13,6 @@
 #       open_set.push(child)
 #     end
 #   end
-#
-# end
-
-class Node
-  attr_accessor :parent, :children, :cars
-
-  Map_x = 6 - 1  #x size of the map
-  Map_y = 6 - 1 #y size of the map
-
-  def initialize(options = {})
-    @parent = options[:parent]
-    @children = []
-    @cars = options[:cars]
-  end
-
-  def get_children
-    cars.each do |car|
-      x = car.x
-      y = car.y
-
-      if car.direction == 'x'
-        find_direction('x',x,y,Map_x, car)
-      elsif car.direction == 'y'
-        find_direction('y',y,x,Map_y, car)
-      end
-    end
-  end
-
-  def find_direction(dir, var_cor, const_cor, map_var, car)
-    new_x = var_cor + car.length - 1
-      while new_x < map_var
-        new_x += 1
-        if find_child(dir,new_x,const_cor, car)
-          new_node(dir,new_x - car.length + 1, car)
-        else
-          break
-        end
-      end
-    new_x = var_cor
-      while new_x > 0
-        new_x -= 1
-        if find_child(dir,new_x,const_cor, car)
-          new_node(dir,new_x, car)
-        else
-        break
-        end      end
-  end
-
-  def find_child(dir, var_cor,const_cor, car)
-    self.cars.each do |c|
-      puts var_cor.to_s + ' ' + const_cor.to_s
-      if(c != car and c.is_there?(var_cor, const_cor))
-        return false
-      end
-    end
-    true
-  end
-
-  def new_node(dir, cor, car)
-    n = Node.new(parent: self, cars: cars.clone)
-    new_car = (n.cars.select {|ca| ca.color == car.color})[0]
-    puts new_car.color.to_s + ' ' + new_car.x.to_s + ' ' + new_car.y.to_s
-    new_car.setx(cor) if dir == 'x'
-    new_car.sety(cor) if dir == 'y'
-    puts new_car.color.to_s + ' ' + new_car.x.to_s + ' ' + new_car.y.to_s
-    children.push(n)
-  end
-
-end
-
 
 class Car
   attr_accessor :color, :length, :x, :y, :direction
@@ -113,6 +43,72 @@ class Car
     end
     false
   end
+end
+
+class Node
+  attr_accessor :parent, :children, :cars
+
+  Map_x = 6 - 1  #x size of the map
+  Map_y = 6 - 1 #y size of the map
+
+  def initialize(options = {})
+    @parent = options[:parent]
+    @children = []
+    @cars = options[:cars]
+  end
+
+  def set_children
+    @cars.each do |car|
+      x = car.x
+      y = car.y
+      color = car.color
+      if car.direction == 'x'
+        while is_free?(car, x + car.length, y)
+          new_node(color, x + 1, y)
+          x += 1
+        end
+        x = car.x
+        while is_free?(car, x - 1, y)
+          new_node(color, x - 1, y)
+          x -= 1
+        end
+        x = car.x
+      else
+        while is_free?(car, x, y + car.length)
+          new_node(color, x, y + 1)
+          y += 1
+        end
+        y = car.y
+        while is_free?(car, x, y - 1)
+          new_node(color, x, y - 1)
+          y -= 1
+        end
+      end
+    end
+  end
+
+  def is_free?(car,x,y)
+    if x<0 or x>Map_x or y<0 or y>Map_y
+      return false
+    end
+    @cars.each do |c|
+      if(c != car and c.is_there?(x, y))
+        return false
+      end
+    end
+    true
+  end
+
+  def new_node(color, x, y)
+    tmp_cars = []
+    cars.each {|c| tmp_cars.push(c.dup)}
+    n = Node.new(parent: self, cars: tmp_cars)
+    new_car = (n.cars.select {|ca| ca.color == color})[0]
+    new_car.setx x
+    new_car.sety y
+    puts new_car.color.to_s + ' ' + new_car.x.to_s + ' ' + new_car.y.to_s
+    children.push(n)
+  end
 
 end
 
@@ -125,13 +121,12 @@ car6 = Car.new(color:'svetlomodre', length:3, x:2,y:5, direction:'x')
 car7 = Car.new(color:'sive', length:2, x:4,y:4, direction:'x')
 car8 = Car.new(color:'tmavomodre', length:3, x:5,y:0, direction:'y')
 
-#puts(car1.is_there?(1,2))
 node = Node.new(parent:nil,cars:[car1,car2, car3, car4, car5, car6, car7, car8])
 
-#puts car1.to_s
-node.get_children
-#node2 = Node.new(parent:node,cars:[car1,car2, car3, car4, car5, car6, car7, car8])
-#node.children.push(node2)
+node.set_children
+
+puts "###############"
+
 node.children.each do |c|
   c.cars.each {|car| puts car.color.to_s + ' ' + car.x.to_s + ' ' + car.y.to_s}
   puts "###############"
