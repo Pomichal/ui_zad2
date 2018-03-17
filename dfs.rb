@@ -5,7 +5,7 @@ require 'set'
 
 class Search
   ##breadt-first search 0, deep first search 1
-  def searching(source, type)
+  def searching(source, type, depth)
     nodes_count = 0
     open_set = []
     closed_set = Set.new
@@ -23,8 +23,12 @@ class Search
       node.set_children  #searching after next moves
       node.children.each do |child|
         if(closed_set.add? child.number)      #adding new nodes, (duplicates don't)
-        open_set.push(child) if type == 0     #bfs: adding to end of the queue
-        open_set.unshift(child) if type == 1  #dfs: adding to beginning of the queue
+          open_set.push(child) if type == 0     #bfs: adding to end of the queue
+          if type == 1  #dfs: adding to beginning of the queue
+            if node.depth < depth
+            open_set.unshift(child)
+            end
+          end
           nodes_count += 1
         end
       end
@@ -92,7 +96,7 @@ class Car
 end
 
 class Node
-  attr_accessor :parent, :children, :cars, :number, :change
+  attr_accessor :parent, :children, :cars, :number, :change, :depth
 
   def initialize(options = {})
     @parent = options[:parent]
@@ -100,10 +104,11 @@ class Node
     @cars = options[:cars]
     @number = 0
     @change = ""
+    @depth = 0
   end
 
   def set_number #number representing the places of cars on table
-    tmp = 0
+    tmp = @depth
     cars.each do |car|
       tmp += (10 ** car.color) * (car.x + car.y)
     end
@@ -159,6 +164,7 @@ class Node
     new_car = (n.cars.select {|ca| ca.color == color})[0]
     new_car.setx x
     new_car.sety y
+    n.depth = self.depth + 1
     n.set_number
     n.change = krok
     children.push(n)
@@ -183,4 +189,33 @@ class Node
       'tmavomodre'
     end
   end
+end
+
+car1 = Car.new(color:1, length:2, x:1,y:2, direction:'x')
+car2 = Car.new(color:2, length:2, x:0,y:0, direction:'x')
+car3 = Car.new(color:3, length:3, x:0,y:1, direction:'y')
+car4 = Car.new(color:4, length:2, x:0,y:4, direction:'y')
+car5 = Car.new(color:5, length:3, x:3,y:1, direction:'y')
+car6 = Car.new(color:6, length:3, x:2,y:5, direction:'x')
+car7 = Car.new(color:7, length:2, x:4,y:4, direction:'x')
+car8 = Car.new(color:8, length:3, x:5,y:0, direction:'y')
+
+node = Node.new(parent:nil,cars:[car1,car2,car3,car4,car5,car6,car7,car8])
+# node.set_children
+#
+# node.children.each do |child|
+#   puts child.change
+#   child.cars.each do |c|
+#     puts node.get_color(c.color).to_s + ' ' + (c.x + 1).to_s + ' ' + (c.y + 1).to_s
+#   end
+#   puts "#######################"
+# end
+#
+# puts node.children.length.to_s
+#
+s = Search.new
+
+x = 1
+until s.searching node, 1, x
+  x += 1
 end
